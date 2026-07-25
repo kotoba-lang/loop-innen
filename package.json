@@ -1,0 +1,8 @@
+{
+  "name": "loop-innen",
+  "private": true,
+  "description": "npm deps for the DataScript query layer over the innen dependency corpus (src/loop_innen/query.cljs). No runtime JS of its own -- nbb consumes these directly.",
+  "dependencies": {
+    "datascript": "^1.7.8"
+  }
+}

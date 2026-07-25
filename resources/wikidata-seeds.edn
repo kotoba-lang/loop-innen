@@ -1,0 +1,72 @@
+;; Seed entities for the Wikidata ingest pass.
+;;
+;; Seeds are given as LABELS, never as hardcoded QIDs. `scripts/ingest_wikidata.cljs`
+;; resolves each one through the Wikidata search API and REFUSES the seed unless
+;; the returned item's description contains `:expect`. A QID typed from memory is
+;; exactly the kind of plausible-but-wrong identifier that would silently attach
+;; real dependency edges to the wrong entity; making the API prove the match
+;; instead is cheap and checkable.
+;;
+;; `:expect` is MANDATORY and must be non-blank -- the ingest refuses a seed
+;; without one. That rule is not theoretical: the first real pass ran with
+;; `:expect ""` on several seeds, and "SWIFT" duly resolved to Q18331735, the
+;; FAMILY NAME Swift, which then entered the graph as a node. An unguarded seed
+;; is a wrong-entity bug waiting for a homonym.
+;;
+;; The spread is deliberate -- BCE to 2024, and every node kind the schema
+;; defines -- because a record that only reaches back to the 20th century cannot
+;; answer the question this repo exists for.
+{:as-of "2026-07-25"
+ :seeds
+ [;; ---- chartered companies: the origin of most modern dependency structure ----
+  {:label "Dutch East India Company" :expect "compan"}
+  {:label "East India Company" :expect "compan"}
+  {:label "Hudson's Bay Company" :expect "compan"}
+  {:label "Standard Oil" :expect "compan"}
+  {:label "Suez Canal Company" :expect "compan"}
+
+  ;; ---- present-day chokepoint firms (join to market-intel via P1278 LEI) ----
+  {:label "TSMC" :expect "compan"}
+  {:label "ASML" :expect "compan"}
+  {:label "Maersk" :expect "compan"}
+  {:label "Society for Worldwide Interbank Financial Telecommunication" :expect "payments"}
+  {:label "CrowdStrike" :expect "compan"}
+
+  ;; ---- polities, including municipalities the workspace already tracks ----
+  {:label "Tokyo Metropolitan Government" :expect "prefectural government"}
+  {:label "City of London Corporation" :expect "municipal corporation"}
+  {:label "Qin dynasty" :expect "dynast"}
+  {:label "Roman Republic" :expect "ancient Roman"}
+  {:label "Hanseatic League" :expect "confederation"}
+  {:label "Bank of England" :expect "bank"}
+  {:label "Federal Reserve System" :expect "central banking"}
+  {:label "OPEC" :expect "petroleum-exporting"}
+
+  ;; ---- instruments ----
+  {:label "Peace of Westphalia" :expect "peace treaty"}
+  {:label "Treaty of Versailles" :expect "treat"}
+  {:label "Bretton Woods Agreement" :expect "agreement"}
+  {:label "Marshall Plan" :expect "foreign aid"}
+  {:label "Montreal Protocol" :expect "protocol"}
+
+  ;; ---- infrastructure ----
+  {:label "Suez Canal" :expect "waterway"}
+  {:label "Panama Canal" :expect "canal"}
+  {:label "Grand Canal" :expect "canal"}
+  {:label "Strait of Hormuz" :expect "strait"}
+  {:label "Nord Stream" :expect "pipeline"}
+  {:label "Aqua Appia" :expect "aqueduct"}
+
+  ;; ---- events ----
+  {:label "Great Depression" :expect "depression"}
+  {:label "2008 financial crisis" :expect "global financial crisis"}
+  {:label "1973 oil crisis" :expect "petroleum shortage"}
+  {:label "Battle of Gaixia" :expect "battle"}
+
+  ;; ---- incidents ----
+  {:label "Chernobyl disaster" :expect "nuclear accident"}
+  {:label "Fukushima nuclear accident" :expect "nuclear disaster"}
+  {:label "Deepwater Horizon oil spill" :expect "oil spill"}
+  {:label "2021 Suez Canal obstruction" :expect "maritime incident"}
+  {:label "2024 CrowdStrike incident" :expect "outage"}
+  {:label "Log4Shell" :expect "vulnerability"}]}
