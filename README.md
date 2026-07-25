@@ -13,7 +13,7 @@ observe (corpora)  ->  evaluate (kotoba-lang/innen scoring)  ->  decide (rank)
 this repo owns the ordering, the ingest, and the evidence ledger. It owns **no
 scoring truth** — criticality, cascade, concentration, cycles and historical
 slicing all live in [`kotoba-lang/innen`](https://github.com/kotoba-lang/innen),
-the same split as `loop-system-dynamics` ⊣ `dynamics`. Implements ADR-2607255500
+the same split as `loop-system-dynamics` ⊣ `dynamics`. Implements ADR-2607258500
 (`com-junkawasaki/root`).
 
 ## Run it
@@ -80,13 +80,23 @@ Real findings from that cycle, all reproducible from the corpus files:
   behind it rather than a thing everyone knows.
 - **The BCE end works**: `as-of -0221` returns the Qin dynasty's succession
   edges, with Qin dated 905–221 BCE and Aqua Appia from 312 BCE.
-- **163 nodes carry a `:company/lei`** — the join key into the unified query
-  plane's SEC financials (ADR-2607252000).
-- **The two corpora currently overlap in ZERO LEIs.** The 8 LEIs Wikidata
+- **163 nodes carry a `:company/lei`**, and the cross-repo join actually
+  returns rows: loaded into the superproject's unified query plane
+  (ADR-2607252000), **66 companies join a dependency edge to their SEC revenue
+  in one query** — e.g. Walmart ($713B) → `:legal-authority` → Delaware.
+  Dependency structure and financial scale became askable together:
+
+  ```bash
+  nbb --classpath ".:scripts/nbb_compat" manifest/edn-query.cljs q \
+    '[:find ?label ?rev ?kind ?dep :where
+      [?n "company/lei" ?lei] [?n "innen.node/label" ?label] [?n "innen.node/id" ?nid]
+      [?f "company/lei" ?lei] [?f "source/dataset" "market-intel"] [?f "company/revenue-usd" ?rev]
+      [?e "innen.edge/from-id" ?nid] [?e "innen.edge/kind" ?kind] [?e "innen.edge/to-id" ?dep]]'
+  ```
+- **The two ingest paths themselves overlap in ZERO LEIs.** The 8 LEIs Wikidata
   supplied (Maersk, TSMC, ASML, CrowdStrike and holding companies) are disjoint
-  from the 155 in `cloud-itonami-lei-*`. The join key exists on both sides and
-  joins nothing yet — a measured gap, and the clearest target for the next
-  ingest pass.
+  from the 155 in `cloud-itonami-lei-*`, so no entity is currently described by
+  both — a measured gap, and the clearest target for the next ingest pass.
 - **Only 1 edge states its own validity interval.** Wikidata statements in this
   sample rarely carry P580/P582 qualifiers, so the record's dated coverage is
   thin; the `window` basis (both endpoints dated) is what currently answers

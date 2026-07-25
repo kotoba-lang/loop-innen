@@ -57,3 +57,14 @@
   (testing "P1542 (has effect) is the one reversed mapping: it reads opposite to an innen edge"
     (is (true? (:reverse? (get wd/property-map "P1542"))))
     (is (not-any? :reverse? (vals (dissoc wd/property-map "P1542"))))))
+
+(deftest person-inference-is-exact-not-substring-test
+  (testing "\"crime against humanity\" must NOT infer :person — it did, as a substring rule, and The Holocaust came back from a real depth-2 pass typed as a person"
+    (is (not= :person (first (wd/infer-kind ["crime against humanity"]))))
+    (is (= :person (first (wd/infer-kind ["human"])))))
+  (testing "classes added from depth-2 refusals"
+    (is (= :polity (first (wd/infer-kind ["former district of Japan"]))))
+    (is (= :organization (first (wd/infer-kind ["stock exchange"]))))
+    (is (= :organization (first (wd/infer-kind ["military alliance"]))))
+    (is (= :event (first (wd/infer-kind ["invasion"]))))
+    (is (= :incident (first (wd/infer-kind ["massacre"]))))))

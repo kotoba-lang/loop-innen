@@ -74,6 +74,16 @@
    "P1278" :lei
    "P31"   :instance-of})
 
+(def exact-kind-label-rules
+  "P31 labels matched by EXACT equality, checked before the substring rules.
+
+   `:person` has to live here. As a substring rule, `\"human\"` matched
+   `\"crime against humanity\"` — which is how The Holocaust came back from a real
+   depth-2 pass classified as a person (and was then refused for having no death
+   date, so the mis-typing showed up as the wrong refusal reason rather than as a
+   wrong node). Personhood is the one inference where a substring is too loose."
+  {"human" :person})
+
 (def kind-label-rules
   "P31 (instance of) label -> innen node kind. Substring rules, applied in
    order, and the matched label is recorded on the node as
@@ -81,8 +91,7 @@
    trusting it. An entity whose P31 labels match nothing is NOT given a
    fallback kind -- it is reported as unclassified and skipped, which shows up
    as a dangling-ref warning rather than as a confidently mis-typed node."
-  [[["human"] :person]
-   [["treaty" "agreement" "charter" "protocol" "concession" "convention" "accord" "contract" "pact"
+  [[["treaty" "agreement" "charter" "protocol" "concession" "convention" "accord" "contract" "pact"
      ;; statutes create obligations the same way an instrument does; added after
      ;; the first real pass refused "Tea Act 1773" (P31 "Act of the Parliament of
      ;; Great Britain") for want of any matching rule
@@ -91,9 +100,11 @@
      ;; natural-hazard classes, added after the first pass refused the 2011
      ;; Tōhoku earthquake and tsunami -- the direct cause of a node already in
      ;; the record (Fukushima Daiichi), so the omission cost a real edge
-     "earthquake" "tsunami" "flood" "hurricane" "typhoon" "eruption" "wildfire" "cyclone" "drought"] :incident]
+     "earthquake" "tsunami" "flood" "hurricane" "typhoon" "eruption" "wildfire" "cyclone" "drought"
+     ;; added after a depth-2 pass refused the British pet massacre
+     "massacre"] :incident]
    [["war" "battle" "crisis" "depression" "recession" "revolution" "election" "conference" "siege" "famine" "pandemic" "epidemic" "event" "coup"
-     "crash"] :event]
+     "crash" "invasion"] :event]
    [["canal" "pipeline" "aqueduct" "railway" "railroad" "port" "factory" "plant" "cable" "bridge" "dam" "strait" "waterway" "network" "infrastructure" "reactor" "platform" "software" "library"
      ;; the Ever Given was refused as a "container ship" while the obstruction it
      ;; caused was already a node
@@ -101,12 +112,18 @@
    [["standard" "specification" "protocol suite" "code" "format"] :standard]
    [["mineral" "commodity" "metal" "element" "crude oil" "resource" "ore"] :resource]
    [["archive" "document" "record" "filing" "manuscript" "plan" "proposal" "memorandum" "report"] :document]
-   [["state" "country" "city" "municipality" "prefecture" "province" "empire" "dynasty" "kingdom" "republic" "government" "polity" "federation" "administrative"] :polity]
+   [["state" "country" "city" "municipality" "prefecture" "province" "empire" "dynasty" "kingdom" "republic" "government" "polity" "federation" "administrative"
+     ;; "former district of Japan" — the wards Tokyo Metropolitan Government
+     ;; succeeded, refused 6 times in one depth-2 pass
+     "district"] :polity]
    [["company" "corporation" "enterprise" "business" "bank" "organization" "organisation" "institution" "agency" "union" "association" "cooperative" "consortium" "league" "cartel" "firm"
      ;; Dutch-language classes for the VOC's own predecessor companies, which the
      ;; first pass refused ("voorcompagnie", "colonial society") -- exactly the
      ;; upstream this record most wants
-     "compagnie" "voorcompagnie" "society" "guild" "trading post"] :organization]])
+     "compagnie" "voorcompagnie" "society" "guild" "trading post"
+     ;; depth-2 refusals: the New York Stock Exchange ("stock exchange") and the
+     ;; Axis Powers ("military alliance") are both bodies entities depend on
+     "exchange" "alliance"] :organization]])
 
 ;; ---------------------------------------------------------------- http
 
@@ -242,11 +259,12 @@
    `[kind matched-label]`, or nil when nothing matched."
   [p31-labels]
   (let [lows (map (comp str/lower-case str) p31-labels)]
-    (some (fn [[needles kind]]
-            (some (fn [l]
-                    (when (some #(str/includes? l %) needles) [kind l]))
-                  lows))
-          kind-label-rules)))
+    (or (some (fn [l] (when-let [kind (get exact-kind-label-rules l)] [kind l])) lows)
+        (some (fn [[needles kind]]
+                (some (fn [l]
+                        (when (some #(str/includes? l %) needles) [kind l]))
+                      lows))
+              kind-label-rules))))
 
 (defn node-id
   "`:node/<slug>` from an English label, falling back to the QID. Keeping the
