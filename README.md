@@ -161,7 +161,7 @@ must not be able to lose ground.
 ## Test
 
 ```bash
-nbb --classpath "../innen/src:src:test" test/run_tests.cljs   # 9 tests, 56 assertions
+npm test    # nbb via `clojure -A:test -Spath`; 10 tests, 63 assertions
 ```
 
 Tests are hermetic (temp corpus dirs, no network). The API-touching paths are

@@ -2,6 +2,9 @@
   "name": "loop-innen",
   "private": true,
   "description": "npm deps for the DataScript query layer over the innen dependency corpus (src/loop_innen/query.cljs). No runtime JS of its own -- nbb consumes these directly.",
+  "scripts": {
+    "test": "nbb --classpath \"$(clojure -A:test -Spath)\" test/run_tests.cljs"
+  },
   "dependencies": {
     "datascript": "^1.7.8"
   }
