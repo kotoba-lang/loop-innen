@@ -2,7 +2,7 @@
   "observe -> evaluate -> decide -> act -> record-evidence over the 因縁
    dependency record.
 
-   `loop-*` per `kotoba-lang/loop-ux-kaizen`'s `resources/repository-rules.edn`:
+   `loop-*` per the workspace taxonomy in com-junkawasaki/root `manifest/repository-rules.edn`:
    this namespace owns the ORDER and the evidence ledger. It owns no scoring
    truth -- criticality, cascade, concentration, cycles and the historical slice
    all live in `kotoba-lang/innen`, the same way `loop-system-dynamics` defers to
