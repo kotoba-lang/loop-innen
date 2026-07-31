@@ -17,6 +17,11 @@ jobs:
         with:
           cli: latest
       - run: npm install
+      # `npm test` invokes nbb directly, not through a local devDependency, so
+      # `npm install` alone leaves it missing -- the first CI run failed with
+      # `sh: 1: nbb: not found` while passing locally, where nbb was already on
+      # PATH. Install it explicitly, as the sibling loop-* repos do.
+      - run: npm install -g nbb
       # `npm test` is this repo's own entry point (nbb over the :test classpath).
       # There is no :test alias with :main-opts, so `clojure -M:test` drops to a
       # REPL -- which is why a sweep looking only for that reported no way to
