@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: DeLaGuardo/setup-clojure@13.4
+        with:
+          cli: latest
+      - run: npm install
+      # `npm test` is this repo's own entry point (nbb over the :test classpath).
+      # There is no :test alias with :main-opts, so `clojure -M:test` drops to a
+      # REPL -- which is why a sweep looking only for that reported no way to
+      # run these tests.
+      - run: npm test
