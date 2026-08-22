@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  com.kotoba.innen-tick.plist  |  the residency for the 因縁 record.
+
+  WARNING: never write two consecutive hyphens inside an XML comment. XML
+  forbids them, and a malformed plist does NOT fail loudly: launchd simply
+  declines to load it, which is the least visible way for a residency to be
+  absent. Refer to ProgramArguments below rather than naming flags here.
+  (The sibling observatory plist carries the same warning because its first
+  version was broken exactly this way.)
+
+  Why this file exists at all: scripts/tick.cljs said it was "registered with
+  tamaki and run by launchd". Measured 2026-08-22, both halves were false.
+  tamaki listed loop-innen only as an example line in its README, and no
+  launchd job for this loop existed on the operator machine while a dozen
+  sibling residencies were loaded. The record stopped growing on 2026-08-12
+  and nothing reported that it had.
+
+  Why launchd: this workspace already put its periodic work there
+  (com.gftd.fleet-ci-tip-tick, com.gftd.observatory-run, com.gftd.hirameki-harvest).
+  A second scheduler splits the answer to "what is running here" in two.
+
+  Why through tamaki: tamaki exec wraps the whole tick as ONE AgentRun, so
+  tamaki status shows one run per tick with its real exit code, while this
+  repo's ledger/loop-innen-ledger.edn keeps the per cycle detail. Two records,
+  each authoritative for its own thing. Verified 2026-08-22 that tamaki exec
+  runs the command with cwd set to the project.
+
+  Why every six hours at :47 past: the tick skips publication when nothing
+  changed, so an idle cycle is cheap, but Wikidata does not move fast enough
+  to reward hourly polling. Minute 47 is unused; the nearest neighbours are
+  kouhou-ingest at 6:41 and hirameki-harvest at :37, both different workloads.
+
+  Install:
+    cp scripts/com.kotoba.innen-tick.plist ~/Library/LaunchAgents/
+    plutil -lint ~/Library/LaunchAgents/com.kotoba.innen-tick.plist
+    launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.kotoba.innen-tick.plist
+    launchctl kickstart -p gui/$(id -u)/com.kotoba.innen-tick
+  Stop:
+    launchctl bootout gui/$(id -u)/com.kotoba.innen-tick
+
+  This job COMMITS AND PUSHES to loop-innen main when the record grows. That is
+  the point of a residency, and it is also why the log paths below matter: read
+  /tmp/innen-tick.err before believing a quiet week.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.kotoba.innen-tick</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/zsh</string>
+    <string>-lc</string>
+    <string>cd /Users/junkawasaki/github/com-junkawasaki/orgs/etzhayyim/tamaki &amp;&amp; exec ./bin/tamaki exec "innen record tick" --project /Users/junkawasaki/github/com-junkawasaki/orgs/kotoba-lang/loop-innen -- nbb --classpath "../innen/src:src:scripts" scripts/tick.cljs --root /Users/junkawasaki/github/com-junkawasaki --depth 2</string>
+  </array>
+  <key>RunAtLoad</key>
+  <false/>
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict><key>Hour</key><integer>2</integer><key>Minute</key><integer>47</integer></dict>
+    <dict><key>Hour</key><integer>8</integer><key>Minute</key><integer>47</integer></dict>
+    <dict><key>Hour</key><integer>14</integer><key>Minute</key><integer>47</integer></dict>
+    <dict><key>Hour</key><integer>20</integer><key>Minute</key><integer>47</integer></dict>
+  </array>
+  <key>StandardOutPath</key>
+  <string>/tmp/innen-tick.log</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/innen-tick.err</string>
+</dict>
+</plist>

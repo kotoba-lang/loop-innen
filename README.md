@@ -82,12 +82,19 @@ Two things were wrong, and the second is the one worth reading:
    through `string-opt` so a bare `--root` cannot hand `true` to a filesystem
    path.
 
-**There is no launchd job for this loop on the current machine.** The docstring
-in `scripts/tick.cljs` says the residency is "registered with `tamaki` and run
-by launchd"; `tamaki` is not on PATH and `launchctl list` shows no matching
-entry, while a dozen sibling residencies (`com.gftd.observatory-run`,
-`com.gftd.fleet-ci-tip-tick`, …) are loaded. Until that is registered, this
-record grows only when somebody runs the tick.
+**The residency is now registered** as `com.kotoba.innen-tick`
+(`scripts/com.kotoba.innen-tick.plist`): launchd at 02:47, 08:47, 14:47 and
+20:47, running the tick through `tamaki exec` so each tick is one `AgentRun`
+with a real exit code. It commits and pushes when the record grows and skips
+publication when it does not.
+
+Until 2026-08-22 there was no such job. `scripts/tick.cljs` claimed the
+residency was "registered with `tamaki` and run by launchd" and **neither half
+was true** — tamaki listed this loop only as an example line in its README, and
+`launchctl list` showed nothing while a dozen sibling residencies were loaded.
+The docstring went on describing a residency that was not there for ten days.
+
+Read `/tmp/innen-tick.err` before believing a quiet week.
 
 ```bash
 nbb --classpath "../innen/src:src:scripts" scripts/tick.cljs \
