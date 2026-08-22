@@ -94,7 +94,22 @@ was true** — tamaki listed this loop only as an example line in its README, an
 `launchctl list` showed nothing while a dozen sibling residencies were loaded.
 The docstring went on describing a residency that was not there for ten days.
 
-Read `/tmp/innen-tick.err` before believing a quiet week.
+Read `/tmp/innen-tick.log` before believing a quiet week.
+
+**Publication was broken from 2026-08-12 to 2026-08-22, and said nothing.** The
+tick pushed to `origin` and to a local branch `main`. A west checkout has
+neither: west names the remote after the manifest entry (`kotoba-lang`) and
+leaves the tree on a DETACHED HEAD. The last successful tick is immediately
+before the commit named `rescue/west-detached-20260812`; publication has been
+impossible ever since while every ingest kept succeeding.
+
+It stayed invisible because the git helper read stdout and the exit code and
+**threw stderr away**, so the summary line was `FAIL publish (exit 1)` for a
+failure git had explained in full. `loop-innen.publish` now resolves the remote
+and its default branch instead of assuming them, pushes `HEAD:<branch>` so a
+detached checkout can publish at all, and returns `:err` on every failure.
+Tested against real temp repositories arranged in exactly that configuration,
+including an assertion that the *shipped* command fails on the same fixture.
 
 ```bash
 nbb --classpath "../innen/src:src:scripts" scripts/tick.cljs \

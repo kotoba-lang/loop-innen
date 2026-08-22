@@ -38,6 +38,7 @@
    quietly regressing. A tick that runs unattended every 6 hours must not be
    able to lose ground."
   (:require [loop-innen.cli :refer [args->map string-opt]]
+            [loop-innen.publish :as publish]
             ["node:child_process" :as cp]
             ["node:fs" :as fs]
             [clojure.edn :as edn]
@@ -101,23 +102,6 @@
       (do (fs/renameSync tmp out)
           (assoc step :size after)))))
 
-(defn- git [& args]
-  (let [r (.spawnSync cp "git" (clj->js (vec args)) #js {:encoding "utf8"})]
-    {:exit (or (.-status r) 1)
-     :out (str/trim (str (.-stdout r)))}))
-
-(defn- dirty-paths
-  "Only the paths a tick is allowed to publish. Anything else a human left in the
-   tree is none of this tick's business, and committing it would launder someone
-   else's edit into an automated commit."
-  []
-  (->> (:out (git "status" "--porcelain" "--" "corpus" "ledger" "target"))
-       str/split-lines
-       (remove str/blank?)
-       (map #(str/trim (subs % 2)))
-       (remove #(str/starts-with? % "target/"))    ; report is regenerated, not tracked
-       vec))
-
 (defn -main []
   (println (str "[innen-tick] " (.toISOString (js/Date.)) " as-of=" as-of
                 " depth=" depth " push=" push?))
@@ -135,7 +119,7 @@
                           (str "corpus/workspace-" as-of ".edn"))]
         cycle-step (run! "cycle" ["nbb" "--classpath" classpath "bin/run.cljs"
                                   "--as-of" as-of])
-        changed (dirty-paths)
+        changed (publish/dirty-paths ".")
         publish
         (cond
           (not push?) {:step "publish" :exit 0 :ok? true :skipped "--no-push"}
@@ -149,12 +133,17 @@
                          "Automated tick (tamaki exec + launchd). Paths: "
                          (str/join ", " changed) "\n")]
             (println (str "\n[innen-tick] publish: " (count changed) " path(s) changed"))
-            (let [add (git "add" "--" "corpus" "ledger")
-                  commit (if (zero? (:exit add)) (git "commit" "-m" msg) add)
-                  pull (if (zero? (:exit commit)) (git "pull" "--ff-only" "-q") commit)
-                  push (if (zero? (:exit pull)) (git "push" "-q" "origin" "main") pull)]
-              {:step "publish" :exit (:exit push) :ok? (zero? (:exit push))
-               :paths changed})))
+            (let [r (publish/publish! {:dir "." :message msg})]
+              (when-not (:ok? r)
+                ;; Print what git said. The previous version recorded the exit
+                ;; code and threw the body away, so the residency reported
+                ;; "FAIL publish (exit 1)" for a failure git had explained in
+                ;; full.
+                (println (str "[innen-tick] publish FAILED at " (:failed-at r)
+                              " (remote " (:remote r) ", branch " (:branch r) ")"))
+                (println (str "[innen-tick]   " (:err r))))
+              {:step "publish" :exit (:exit r) :ok? (:ok? r)
+               :paths changed :err (:err r) :failed-at (:failed-at r)})))
         all (conj (vec steps) cycle-step publish)]
     (println "\n[innen-tick] summary")
     (doseq [{:keys [step exit ok? skipped size refused-regression]} all]
