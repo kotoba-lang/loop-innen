@@ -4,11 +4,19 @@
      nbb --classpath \"../innen/src:src:scripts\" scripts/tick.cljs \\
        [--depth 2] [--as-of YYYY-MM-DD] [--root <superproject>] [--no-push]
 
-   Registered with `tamaki` and run by launchd; see ADR-2607258500 and the
-   adr-ledger entry for this residency. `tamaki exec` wraps this whole script as
-   ONE AgentRun, so `tamaki status` shows one run per tick with its real exit
-   code, while this repo's own `ledger/loop-innen-ledger.edn` keeps the per-cycle
-   detail. Two records, each authoritative for its own thing.
+   Run by launchd through `tamaki exec`; the job is
+   `scripts/com.kotoba.innen-tick.plist` (see ADR-2607258500). `tamaki exec`
+   wraps this whole script as ONE AgentRun, so `tamaki status` shows one run per
+   tick with its real exit code, while this repo's own
+   `ledger/loop-innen-ledger.edn` keeps the per-cycle detail. Two records, each
+   authoritative for its own thing.
+
+   This paragraph used to say the residency was "registered with tamaki and run
+   by launchd". Measured 2026-08-22, neither half was true: tamaki listed this
+   loop only as an example line in its README, and no launchd job existed on the
+   operator machine. The record had stopped on 2026-08-12 and the docstring went
+   on describing a residency that was not there. A claim about the world that
+   nothing checks decays into a claim about the past.
 
    Failure policy, deliberately not uniform:
 
