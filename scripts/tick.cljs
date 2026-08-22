@@ -29,21 +29,17 @@
    replace a corpus with a smaller one -- reporting the refusal instead of
    quietly regressing. A tick that runs unattended every 6 hours must not be
    able to lose ground."
-  (:require ["node:child_process" :as cp]
+  (:require [loop-innen.cli :refer [args->map string-opt]]
+            ["node:child_process" :as cp]
             ["node:fs" :as fs]
             [clojure.edn :as edn]
             [clojure.string :as str]))
 
-(defn- args->map [args]
-  (into {} (for [[k v] (partition-all 2 args)
-                 :when (and k (str/starts-with? k "--"))]
-             [(keyword (subs k 2)) (or v true)])))
 
 (def cli (args->map *command-line-args*))
-(def as-of (or (when (string? (:as-of cli)) (:as-of cli))
-               (.toISOString.slice (js/Date.) 0 10)))
-(def depth (str (or (:depth cli) "2")))
-(def superproject (or (when (string? (:root cli)) (:root cli)) "../../.."))
+(def as-of (string-opt cli :as-of (.slice (.toISOString (js/Date.)) 0 10)))
+(def depth (string-opt cli :depth "2"))
+(def superproject (string-opt cli :root "../../.."))
 (def push? (not (:no-push cli)))
 (def classpath "../innen/src:src:scripts")
 

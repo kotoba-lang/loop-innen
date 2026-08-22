@@ -32,7 +32,8 @@
    cloud-itonami-municipality-gbr-london records `:name-en \"Greater London
    Authority\"` against `:wikidata \"Q84\"`, which is London the city. Merging on
    that QID would silently fuse a municipal corporation with a settlement."
-  (:require ["fs" :as fs]
+  (:require [loop-innen.cli :refer [args->map string-opt]]
+            ["fs" :as fs]
             ["path" :as path]
             [clojure.edn :as edn]
             [clojure.string :as str]
@@ -40,14 +41,11 @@
             [innen.schema :as is]
             [loop-innen.wikidata :as wd]))
 
-(defn- args->map [args]
-  (into {} (for [[k v] (partition-all 2 args) :when (and k (str/starts-with? k "--"))]
-             [(keyword (subs k 2)) v])))
 
 (def cli (args->map *command-line-args*))
-(def root (or (:root cli) "../../.."))
-(def as-of (or (:as-of cli) (.toISOString.slice (js/Date.) 0 10)))
-(def out-file (or (:out cli) (str "corpus/workspace-" as-of ".edn")))
+(def root (string-opt cli :root "../../.."))
+(def as-of (string-opt cli :as-of (.slice (.toISOString (js/Date.)) 0 10)))
+(def out-file (string-opt cli :out (str "corpus/workspace-" as-of ".edn")))
 
 (defn- read-edn [f]
   (try (edn/read-string (str (fs/readFileSync f "utf8")))
@@ -120,7 +118,7 @@
         {:node node :jurisdiction jnode :edge edge}))))
 
 (defn -main []
-  (let [merge-corpus (when-let [f (:merge-with cli)] (read-edn f))
+  (let [merge-corpus (when-let [f (string-opt cli :merge-with nil)] (read-edn f))
         lei-index (into {} (keep (fn [n] (when-let [l (:company/lei n)] [l (:innen.node/id n)]))
                                  (:innen/nodes merge-corpus)))
         muni (vec (keep municipality->node (itonami-dirs "cloud-itonami-municipality-")))
