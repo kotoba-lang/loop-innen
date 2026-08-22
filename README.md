@@ -48,6 +48,52 @@ Adding coverage means adding a seed to `resources/wikidata-seeds.edn` (a **label
 plus an `:expect` substring, never a QID) or dropping another corpus file into
 `corpus/`. No code changes.
 
+## Residency status — read this before trusting the dates
+
+**The resident tick stopped on 2026-08-12 and was restarted by hand on
+2026-08-22.** Ten days are missing from the corpus and from the ledger, and no
+`chore(innen): resident tick` commit exists for them. The gap is real history
+that was not observed, not history that did not happen.
+
+Two things were wrong, and the second is the one worth reading:
+
+1. **The tick could not run at all.** `(.toISOString.slice (js/Date.) 0 10)`
+   appeared in four files. An older nbb resolved it; the current one does not,
+   and every entry point died before doing anything. Fixed to
+   `(.slice (.toISOString (js/Date.)) 0 10)`.
+
+2. **Argument order silently changed what was ingested.** Each of the four
+   scripts carried its own `partition-all 2` parser, and all four read a
+   boolean flag and the NEXT FLAG'S NAME as one pair:
+
+   ```text
+   --no-push --root /abs/path   =>   {:no-push "--root"}    ; /abs/path dropped
+   --root /abs/path --no-push   =>   {:root "/abs/path" …}  ; correct
+   ```
+
+   `--root` then fell back to `../../..`, which from `orgs/kotoba-lang/loop-innen`
+   *is* the superproject — so in production it was right by position, and the
+   defect never went red. Invoked the other way round the workspace ingest
+   walked a directory that does not exist and reported **`ok ingest:workspace
+   (exit 0) — 0 nodes / 0 edges`**: a successful ingest of an empty world.
+
+   There is now one parser (`loop-innen.cli`), it is tested against the old
+   behaviour rather than only against the new one, and every valued option goes
+   through `string-opt` so a bare `--root` cannot hand `true` to a filesystem
+   path.
+
+**There is no launchd job for this loop on the current machine.** The docstring
+in `scripts/tick.cljs` says the residency is "registered with `tamaki` and run
+by launchd"; `tamaki` is not on PATH and `launchctl list` shows no matching
+entry, while a dozen sibling residencies (`com.gftd.observatory-run`,
+`com.gftd.fleet-ci-tip-tick`, …) are loaded. Until that is registered, this
+record grows only when somebody runs the tick.
+
+```bash
+nbb --classpath "../innen/src:src:scripts" scripts/tick.cljs \
+  --root <superproject> --no-push
+```
+
 ## What keeps this record honest
 
 Every one of these came out of an actual failure in the first real pass, not from

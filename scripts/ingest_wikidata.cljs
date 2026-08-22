@@ -14,7 +14,8 @@
    `--as-of` exists because Date.now() is unavailable in some of this
    workspace's runners; it defaults to the system date here, which is fine for a
    script a human invokes."
-  (:require ["fs" :as fs]
+  (:require [loop-innen.cli :refer [args->map string-opt]]
+            ["fs" :as fs]
             ["path" :as path]
             [clojure.edn :as edn]
             [clojure.string :as str]
@@ -23,16 +24,12 @@
             [loop-innen.wikidata :as wd]
             [promesa.core :as p]))
 
-(defn- args->map [args]
-  (into {} (for [[k v] (partition-all 2 args)
-                 :when (and k (str/starts-with? k "--"))]
-             [(keyword (subs k 2)) v])))
 
 (def cli (args->map *command-line-args*))
-(def as-of (or (:as-of cli) (.toISOString.slice (js/Date.) 0 10)))
-(def max-depth (js/parseInt (or (:depth cli) "1") 10))
-(def seeds-file (or (:seeds cli) "resources/wikidata-seeds.edn"))
-(def out-file (or (:out cli) (str "corpus/wikidata-" as-of ".edn")))
+(def as-of (string-opt cli :as-of (.slice (.toISOString (js/Date.)) 0 10)))
+(def max-depth (js/parseInt (string-opt cli :depth "1") 10))
+(def seeds-file (string-opt cli :seeds "resources/wikidata-seeds.edn"))
+(def out-file (string-opt cli :out (str "corpus/wikidata-" as-of ".edn")))
 
 (defn- read-edn [f] (edn/read-string (str (fs/readFileSync f "utf8"))))
 

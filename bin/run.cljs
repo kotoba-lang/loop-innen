@@ -3,16 +3,14 @@
    decide -> write the report -> append one ledger line.
 
      nbb --classpath \"../innen/src:src\" bin/run.cljs [--as-of YYYY-MM-DD] [--dir .]"
-  (:require [clojure.string :as str]
+  (:require [loop-innen.cli :refer [args->map string-opt]]
+            [clojure.string :as str]
             [loop-innen.core :as loop-innen]))
 
-(defn- args->map [args]
-  (into {} (for [[k v] (partition-all 2 args) :when (and k (str/starts-with? k "--"))]
-             [(keyword (subs k 2)) v])))
 
 (let [cli (args->map *command-line-args*)
-      as-of (or (:as-of cli) (.toISOString.slice (js/Date.) 0 10))
-      entry (loop-innen/cycle! {:dir (or (:dir cli) ".") :as-of as-of})]
+      as-of (string-opt cli :as-of (.slice (.toISOString (js/Date.)) 0 10))
+      entry (loop-innen/cycle! {:dir (string-opt cli :dir ".") :as-of as-of})]
   (println (str "loop-innen cycle " (:event/seq entry) " — " as-of))
   (println (str "  corpora: " (count (:innen/corpora entry))
                 (when (seq (:innen/skipped entry)) (str " (skipped " (count (:innen/skipped entry)) ")"))))
