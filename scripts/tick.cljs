@@ -11,8 +11,8 @@
    `ledger/loop-innen-ledger.edn` keeps the per-cycle detail. Two records, each
    authoritative for its own thing.
 
-   This paragraph used to say the residency was "registered with tamaki and run
-   by launchd". Measured 2026-08-22, neither half was true: tamaki listed this
+   This paragraph used to claim the residency was `registered with tamaki and
+   run by launchd`. Measured 2026-08-22, neither half was true: tamaki listed this
    loop only as an example line in its README, and no launchd job existed on the
    operator machine. The record had stopped on 2026-08-12 and the docstring went
    on describing a residency that was not there. A claim about the world that
@@ -174,4 +174,4 @@
         (println "[innen-tick] NOTE: an ingest step failed; the cycle ran over the previous corpus"))
       (js/process.exit (if (seq fatal) (:exit (first fatal)) 0)))))
 
-(-main)
+(if (:parse-only cli) (js/process.exit 0) (-main))
