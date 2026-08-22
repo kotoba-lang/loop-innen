@@ -1,6 +1,7 @@
 (ns run-tests
   (:require [cljs.test :as t]
             [loop-innen.cli-test]
+            [loop-innen.scripts-load-test]
             [loop-innen.core-test]
             [loop-innen.wikidata-test]))
 
@@ -8,4 +9,4 @@
   (when-not (t/successful? m)
     (js/process.exit 1)))
 
-(t/run-tests 'loop-innen.wikidata-test 'loop-innen.core-test 'loop-innen.cli-test)
+(t/run-tests 'loop-innen.wikidata-test 'loop-innen.core-test 'loop-innen.cli-test 'loop-innen.scripts-load-test)

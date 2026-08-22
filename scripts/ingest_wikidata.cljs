@@ -250,4 +250,4 @@
       (println (str "  schema errors: " (count errors) " -- first: " (pr-str (first errors)))))
     (println (str "  wrote " out-file))))
 
-(-main)
+(if (:parse-only cli) (js/process.exit 0) (-main))

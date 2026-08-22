@@ -9,6 +9,7 @@
 
 
 (let [cli (args->map *command-line-args*)
+      _ (when (:parse-only cli) (js/process.exit 0))
       as-of (string-opt cli :as-of (.slice (.toISOString (js/Date.)) 0 10))
       entry (loop-innen/cycle! {:dir (string-opt cli :dir ".") :as-of as-of})]
   (println (str "loop-innen cycle " (:event/seq entry) " — " as-of))
