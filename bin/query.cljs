@@ -1,7 +1,7 @@
 (ns query
-  "CLI for the DataScript query layer over the 因縁 corpora.
+  "CLI for the Datalog query layer over the 因縁 corpora.
 
-     nbb --classpath \"../innen/src:src:bin\" bin/query.cljs <mode> [args]
+     nbb bin/query.cljs <mode> [args]
 
    modes: stats | demo | deps <node-id> | explain <from> <to> | as-of <year> | q '<datalog>'"
   (:require [loop-innen.query :as lq]))
@@ -14,8 +14,8 @@
     "deps" (lq/run-deps dir a)
     "explain" (lq/run-explain dir a b)
     "as-of" (lq/run-as-of dir a)
-    "q" (let [{:keys [conn]} (lq/build dir)]
-          (doseq [row (sort-by str (lq/q a conn))]
+    "q" (let [{:keys [db]} (lq/build dir)]
+          (doseq [row (sort-by str (lq/q a db))]
             (println (pr-str row))))
-    (do (println "usage: nbb --classpath \"../innen/src:src:bin\" bin/query.cljs [stats | demo | deps <node-id> | explain <from> <to> | as-of <year> | q '<datalog>']")
+    (do (println "usage: nbb bin/query.cljs [stats | demo | deps <node-id> | explain <from> <to> | as-of <year> | q '<datalog>']")
         (js/process.exit 1))))

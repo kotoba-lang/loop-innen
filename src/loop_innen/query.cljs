@@ -1,34 +1,30 @@
 (ns loop-innen.query
-  "DataScript query layer over the 因縁 corpora.
+  "Datalog query layer over the 因縁 corpora.
 
-     nbb --classpath \"../innen/src:src:bin\" bin/query.cljs stats
-     nbb --classpath \"../innen/src:src:bin\" bin/query.cljs demo
-     nbb --classpath \"../innen/src:src:bin\" bin/query.cljs deps node/tsmc
-     nbb --classpath \"../innen/src:src:bin\" bin/query.cljs explain node/log4shell node/log4j
-     nbb --classpath \"../innen/src:src:bin\" bin/query.cljs as-of 1700
-     nbb --classpath \"../innen/src:src:bin\" bin/query.cljs q '[:find ?l :where [?e \"innen.node/kind\" \"incident\"] [?e \"innen.node/label\" ?l]]'
+     nbb bin/query.cljs stats
+     nbb bin/query.cljs demo
+     nbb bin/query.cljs deps node/tsmc
+     nbb bin/query.cljs explain node/log4shell node/log4j
+     nbb bin/query.cljs as-of 1700
+     nbb bin/query.cljs q '[:find ?l :where [?e \"innen.node/kind\" \"incident\"] [?e \"innen.node/label\" ?l]]'
 
    Convention, matching `com-junkawasaki/root`'s `manifest/edn-query.cljs` and
-   `loop-system-dynamics/src/loop_system_dynamics/query.cljs` exactly: the npm
-   `datascript` package exposes its JS interface, so **attributes are bare
-   strings** (`\"innen.node/id\"`, no leading colon), keyword VALUES are
-   stringified the same way (`:node/tsmc` -> `\"node/tsmc\"`), and `:db/id` is the
-   one colon-prefixed key. A query written for either of those tools runs here
-   unchanged.
+   `loop-system-dynamics/src/loop_system_dynamics/query.cljs` exactly: attributes
+   are bare strings (`\"innen.node/id\"`, no leading colon), keyword VALUES are
+   stringified the same way (`:node/tsmc` -> `\"node/tsmc\"`). A query written for
+   either of those tools runs here unchanged.
 
-   Because the JS interface has no lookup refs, an edge joins to its endpoints by
-   VALUE -- `\"innen.edge/from-id\"` to `\"innen.node/id\"` -- which is exactly why
-   `innen.tx` keeps those plain-keyword id attributes alongside the ref ones. On
-   a real Datomic / kotobase deployment, use `innen.tx/->tx` instead and join
-   through `:innen.edge/from` as a ref."
-  (:require ["datascript" :as ds-mod]
+   Because there are no lookup refs, an edge joins to its endpoints by VALUE --
+   `\"innen.edge/from-id\"` to `\"innen.node/id\"` -- which is exactly why
+   `innen.tx` keeps those plain-keyword id attributes alongside the ref ones."
+  (:require [clojure.edn :as edn]
             [clojure.string :as str]
+            [datalog.core :as dl]
+            [datalog.index :as index]
             [innen.algo :as ia]
             [innen.core :as ic]
             [innen.tx :as itx]
             [loop-innen.core :as loop-innen]))
-
-(def ds (.-default ds-mod))
 
 (defn- attr-name [k]
   (if (keyword? k)
@@ -43,32 +39,66 @@
     (nil? v) ""
     :else v))
 
-(defn- entity->js [m]
-  (let [obj (js-obj)]
-    (doseq [[k v] m]
-      (if (= k :db/id)
-        (aset obj ":db/id" v)
-        (aset obj (attr-name k) (->value v))))
-    obj))
+(defn- parse-vector-query [query]
+  (let [qvec (if (string? query) (edn/read-string query) query)
+        idx-in (first (keep-indexed #(when (= %2 :in) %1) qvec))
+        idx-where (or (first (keep-indexed #(when (= %2 :where) %1) qvec)) -1)
+        find-end (or idx-in idx-where)
+        find-syms (vec (subvec qvec 1 find-end))
+        in-syms (when idx-in (vec (subvec qvec (inc idx-in) idx-where)))
+        where-clauses (when (pos? idx-where) (vec (subvec qvec (inc idx-where))))]
+    {:find find-syms :in in-syms :where where-clauses}))
+
+(defn- norm-ground [x]
+  (cond
+    (symbol? x) x
+    (keyword? x) (attr-name x)
+    :else x))
+
+(defn- norm-clause [clause]
+  (mapv norm-ground clause))
+
+(defn- records->db [records]
+  (reduce (fn [db record]
+            (let [subject (str (:db/id record))]
+              (reduce (fn [acc [k v]]
+                        (if (= k :db/id)
+                          acc
+                          (index/assert-quad acc
+                                             {:s subject
+                                              :p (attr-name k)
+                                              :o (->value v)}
+                                             (constantly false))))
+                      db
+                      record)))
+          (index/empty-db)
+          records))
 
 (defn build
-  "Observe every corpus, project it through `innen.tx/->flat-tx`, and transact.
-   Returns `{:conn … :graph … :corpora … :skipped … :tx-count …}`."
+  "Observe every corpus, project it through `innen.tx/->flat-tx`, and load into
+   datalog. Returns `{:db … :graph … :corpora … :skipped … :tx-count …}`."
   [dir]
   (let [{:keys [innen/graph innen/corpora innen/skipped]} (loop-innen/observe dir)
         tempid (atom 0)
         next-tempid! (fn [] (swap! tempid dec))
         tx (mapv (fn [e] (assoc e :db/id (next-tempid!)))
                  (itx/->flat-tx graph {:dataset "innen"}))
-        conn (.create_conn ds)]
-    (.transact ds conn (into-array (map entity->js tx)))
-    {:conn conn :graph graph :corpora corpora :skipped skipped :tx-count (count tx)}))
+        db (records->db tx)]
+    {:db db :graph graph :corpora corpora :skipped skipped :tx-count (count tx)}))
 
 (defn q
   "`query` may be a datalog string (the convention shared with
    manifest/edn-query.cljs) or Clojure data, which is pr-str'd for you."
-  [query conn]
-  (js->clj (.q ds (if (string? query) query (pr-str query)) (.db ds conn))))
+  [query db & inputs]
+  (let [{:keys [find in where]} (parse-vector-query
+                                 (if (string? query) query (pr-str query)))
+        in-syms (vec (remove #{'$} (or in [])))
+        _ (when (not= (count in-syms) (count inputs))
+            (throw (ex-info "loop-innen.query: :in arity mismatch"
+                            {:in in-syms :inputs inputs})))]
+    (dl/q db {:find find :in in :where (mapv norm-clause where)}
+          (constantly true)
+          inputs)))
 
 (def demo-queries
   "Queries that exercise the parts of this record that make it worth having: the
@@ -115,12 +145,12 @@
                 "[?t \"innen.node/id\" ?tid] [?t \"innen.node/label\" ?label]]")}])
 
 (defn run-demo [dir]
-  (let [{:keys [conn corpora tx-count skipped]} (build dir)]
+  (let [{:keys [db corpora tx-count skipped]} (build dir)]
     (println (str "loop-innen query: " (count corpora) " corpora, " tx-count " entities transacted"
                   (when (seq skipped) (str ", " (count skipped) " file(s) skipped"))))
     (println)
     (doseq [{:keys [label query]} demo-queries]
-      (let [rows (q query conn)]
+      (let [rows (q query db)]
         (println (str "## " label " — " (count rows) " row(s)"))
         (doseq [r (take 12 (sort-by str rows))]
           (println (str "   " (str/join "  |  " (map pr-str r)))))
