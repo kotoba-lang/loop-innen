@@ -18,7 +18,7 @@
             ["fs" :as fs]
             ["path" :as path]
             [clojure.edn :as edn]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [innen.core :as ic]
             [innen.schema :as is]
             [loop-innen.wikidata :as wd]

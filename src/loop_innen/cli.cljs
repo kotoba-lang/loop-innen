@@ -15,7 +15,7 @@
   invoked as `--no-push --root <abs>` ingested 0 municipalities and 0 legal
   entities from a root that did not exist, and reported it as a successful
   ingest of an empty workspace."
-  (:require [clojure.string :as str]))
+  (:require [kotoba.lang.text :as str]))
 
 (defn flag? [t] (str/starts-with? (str t) "--"))
 

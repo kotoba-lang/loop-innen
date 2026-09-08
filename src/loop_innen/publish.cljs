@@ -29,7 +29,7 @@
   The push is not forced, so a non-fast-forward is refused by git rather than
   resolved by this code."
   (:require ["node:child_process" :as cp]
-            [clojure.string :as str]))
+            [kotoba.lang.text :as str]))
 
 (defn git
   "Run git in `dir`. Returns `{:exit :out :err}` — all three, always.

@@ -42,7 +42,7 @@
             ["node:child_process" :as cp]
             ["node:fs" :as fs]
             [clojure.edn :as edn]
-            [clojure.string :as str]))
+            [kotoba.lang.text :as str]))
 
 
 (def cli (args->map *command-line-args*))

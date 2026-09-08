@@ -11,7 +11,7 @@
             ["node:os" :as os]
             ["node:path" :as path]
             [cljs.test :refer [deftest is testing]]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [loop-innen.publish :as pub]))
 
 (defn- sh! [dir & args]
