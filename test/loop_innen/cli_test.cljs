@@ -8,7 +8,7 @@
   So argument ORDER decided whether the tick read the real workspace or an
   empty directory, and an ingest of a non-existent root reported success with
   zero entities. Measured 2026-08-22."
-  (:require [cljs.test :refer [deftest is testing]]
+  (:require [kotoba.lang.text] [cljs.test :refer [deftest is testing]]
             [loop-innen.cli :as cli]))
 
 (deftest a-boolean-flag-does-not-eat-the-next-flags-name
@@ -49,7 +49,7 @@
             so the old behaviour is reproduced here and asserted to differ"
     (let [old (fn [args]
                 (into {} (for [[k v] (partition-all 2 args)
-                               :when (and k (clojure.string/starts-with? k "--"))]
+                               :when (and k (kotoba.lang.text/starts-with? k "--"))]
                            [(keyword (subs k 2)) (or v true)])))
           args ["--no-push" "--root" "/abs/path"]]
       (is (= {:no-push "--root"} (old args)) "this is what shipped")

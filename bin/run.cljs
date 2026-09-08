@@ -4,7 +4,7 @@
 
      nbb --classpath \"../innen/src:src\" bin/run.cljs [--as-of YYYY-MM-DD] [--dir .]"
   (:require [loop-innen.cli :refer [args->map string-opt]]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [loop-innen.core :as loop-innen]))
 
 

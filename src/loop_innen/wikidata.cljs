@@ -25,7 +25,7 @@
    Confidence is `:attested`, never `:documented`, for everything ingested here:
    Wikidata is a secondary source that cites primaries. Upgrading an edge to
    `:documented` is a human act after reading the primary."
-  (:require [clojure.string :as str]))
+  (:require [kotoba.lang.text :as str]))
 
 (def user-agent
   "Wikidata asks for a descriptive UA with contact info."
@@ -175,8 +175,8 @@
        (fn [json]
          (let [hits (some-> json (js->clj :keywordize-keys true) :search)
                match (first (filter (fn [h]
-                                      (str/includes? (str/lower-case (str (:description h)))
-                                                     (str/lower-case expect)))
+                                      (str/includes? (str/lower (str (:description h)))
+                                                     (str/lower expect)))
                                     hits))]
            (cond
              (nil? (seq hits))
@@ -258,7 +258,7 @@
   "Infer a node kind from the labels of its P31 targets. Returns
    `[kind matched-label]`, or nil when nothing matched."
   [p31-labels]
-  (let [lows (map (comp str/lower-case str) p31-labels)]
+  (let [lows (map (comp str/lower str) p31-labels)]
     (or (some (fn [l] (when-let [kind (get exact-kind-label-rules l)] [kind l])) lows)
         (some (fn [[needles kind]]
                 (some (fn [l]
@@ -278,12 +278,12 @@
    `scripts/ingest_wikidata.cljs`, which exists for exactly this class of bug."
   [label qid]
   (let [slug (if (str/blank? (str label))
-               (str/lower-case qid)
+               (str/lower qid)
                (-> (str label)
-                   str/lower-case
+                   str/lower
                    (str/replace #"[^a-z0-9]+" "-")
                    (str/replace #"^-|-$" "")
-                   (as-> s (if (str/blank? s) (str/lower-case qid) s))))]
+                   (as-> s (if (str/blank? s) (str/lower qid) s))))]
     (keyword "node" (if (re-find #"^[0-9]" slug) (str "n" slug) slug))))
 
 (defn verify-properties!
@@ -298,7 +298,7 @@
          (let [ents (or (some-> json (js->clj :keywordize-keys false) (get "entities")) {})]
            (reduce (fn [acc [pid {:keys [expect-label] :as m}]]
                      (let [actual (get-in ents [pid "labels" "en" "value"])]
-                       (if (= (str/lower-case (str actual)) (str/lower-case expect-label))
+                       (if (= (str/lower (str actual)) (str/lower expect-label))
                          (assoc-in acc [:verified pid] (assoc m :label actual))
                          (update acc :refused conj
                                  {:innen/property pid

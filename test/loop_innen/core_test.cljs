@@ -6,7 +6,7 @@
             ["path" :as path]
             [cljs.test :refer [deftest is testing]]
             [clojure.edn :as edn]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [loop-innen.core :as sut]))
 
 (defn- tmp-dir []

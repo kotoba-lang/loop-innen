@@ -1,5 +1,10 @@
 {:paths ["src" "bin" "scripts"]
- :deps {kotoba-lang/innen {:git/url "https://github.com/kotoba-lang/innen.git"
+ :deps {
+        ;; kotoba.lang.text, not clojure.string. Pinned as an explicit floor:
+        ;; tools.deps takes the NEWEST sha it is shown, so without a floor here
+        ;; this repo silently rides whatever a sibling happens to name.
+        io.github.kotoba-lang/text {:git/sha "73bdb13ae7a3d004b44bca08be03a3191157a38f"}
+       kotoba-lang/innen {:git/url "https://github.com/kotoba-lang/innen.git"
          :git/sha "a45b03e4dfb137e1991814ead09f64876519e624"}}
  :aliases
  {:test {:extra-paths ["test"]}}}

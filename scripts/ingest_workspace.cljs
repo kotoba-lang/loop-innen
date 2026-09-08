@@ -36,7 +36,7 @@
             ["fs" :as fs]
             ["path" :as path]
             [clojure.edn :as edn]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [innen.core :as ic]
             [innen.schema :as is]
             [loop-innen.wikidata :as wd]))
@@ -63,7 +63,7 @@
       [])))
 
 (defn jurisdiction-node [code src]
-  {:innen.node/id (keyword "node" (str "jurisdiction-" (str/lower-case (str/replace code #"[^A-Za-z0-9]+" "-"))))
+  {:innen.node/id (keyword "node" (str "jurisdiction-" (str/lower (str/replace code #"[^A-Za-z0-9]+" "-"))))
    :innen.node/kind :polity
    :innen.node/label code
    :innen.node/jurisdiction code
@@ -83,7 +83,7 @@
                                          (when-let [s (:sourced-from o)] (str " — " s)))}
           (:name-local o) (assoc :innen.node/label-local (:name-local o))
           (:wikidata o) (assoc :innen.node/wikidata (:wikidata o))
-          (get-in o [:hq :country]) (assoc :innen.node/jurisdiction (str/upper-case (get-in o [:hq :country])))
+          (get-in o [:hq :country]) (assoc :innen.node/jurisdiction (str/upper (get-in o [:hq :country])))
           ;; The London case: name-en and the recorded QID can denote different
           ;; things. Kept as a note on the node rather than resolved silently.
           (:wikidata o) (assoc :innen.node/note

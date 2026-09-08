@@ -18,7 +18,7 @@
    `\"innen.edge/from-id\"` to `\"innen.node/id\"` -- which is exactly why
    `innen.tx` keeps those plain-keyword id attributes alongside the ref ones."
   (:require [clojure.edn :as edn]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [datalog.core :as dl]
             [datalog.index :as index]
             [innen.algo :as ia]
