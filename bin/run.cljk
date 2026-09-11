@@ -2,7 +2,7 @@
   "One 因縁 cycle: observe every corpus -> evaluate via kotoba-lang/innen ->
    decide -> write the report -> append one ledger line.
 
-     nbb --classpath \"../innen/src:src\" bin/run.cljs [--as-of YYYY-MM-DD] [--dir .]"
+     nbb --classpath \"../innen/src:src\" bin/run.cljk [--as-of YYYY-MM-DD] [--dir .]"
   (:require [loop-innen.cli :refer [args->map string-opt]]
             [kotoba.lang.text :as str]
             [loop-innen.core :as loop-innen]))

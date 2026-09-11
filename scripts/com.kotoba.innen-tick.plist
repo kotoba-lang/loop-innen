@@ -10,7 +10,7 @@
   (The sibling observatory plist carries the same warning because its first
   version was broken exactly this way.)
 
-  Why this file exists at all: scripts/tick.cljs said it was "registered with
+  Why this file exists at all: scripts/tick.cljk said it was "registered with
   tamaki and run by launchd". Measured 2026-08-22, both halves were false.
   tamaki listed loop-innen only as an example line in its README, and no
   launchd job for this loop existed on the operator machine while a dozen
@@ -52,7 +52,7 @@
   <array>
     <string>/bin/zsh</string>
     <string>-lc</string>
-    <string>cd /Users/junkawasaki/github/com-junkawasaki/orgs/etzhayyim/tamaki &amp;&amp; exec ./bin/tamaki exec "innen record tick" --project /Users/junkawasaki/github/com-junkawasaki/orgs/kotoba-lang/loop-innen -- nbb --classpath "../innen/src:src:scripts" scripts/tick.cljs --root /Users/junkawasaki/github/com-junkawasaki --depth 2</string>
+    <string>cd /Users/junkawasaki/github/com-junkawasaki/orgs/etzhayyim/tamaki &amp;&amp; exec ./bin/tamaki exec "innen record tick" --project /Users/junkawasaki/github/com-junkawasaki/orgs/kotoba-lang/loop-innen -- nbb --classpath "../innen/src:src:scripts" scripts/tick.cljk --root /Users/junkawasaki/github/com-junkawasaki --depth 2</string>
   </array>
   <key>RunAtLoad</key>
   <false/>

@@ -1,6 +1,6 @@
 ;; Seed entities for the Wikidata ingest pass.
 ;;
-;; Seeds are given as LABELS, never as hardcoded QIDs. `scripts/ingest_wikidata.cljs`
+;; Seeds are given as LABELS, never as hardcoded QIDs. `scripts/ingest_wikidata.cljk`
 ;; resolves each one through the Wikidata search API and REFUSES the seed unless
 ;; the returned item's description contains `:expect`. A QID typed from memory is
 ;; exactly the kind of plausible-but-wrong identifier that would silently attach

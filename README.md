@@ -20,14 +20,14 @@ the same split as `loop-system-dynamics` ⊣ `dynamics`. Implements ADR-26072585
 
 ```bash
 # one cycle: observe every corpus -> score -> report -> append one ledger line
-nbb --classpath "../innen/src:src:bin" bin/run.cljs
+nbb --classpath "../innen/src:src:bin" bin/run.cljk
 
 # query the record (DataScript; same datalog dialect as manifest/edn-query.cljs)
-nbb --classpath "../innen/src:src:bin" bin/query.cljs demo
-nbb --classpath "../innen/src:src:bin" bin/query.cljs deps node/maersk
-nbb --classpath "../innen/src:src:bin" bin/query.cljs explain node/log4shell node/log4j
-nbb --classpath "../innen/src:src:bin" bin/query.cljs as-of -0221
-nbb --classpath "../innen/src:src:bin" bin/query.cljs q \
+nbb --classpath "../innen/src:src:bin" bin/query.cljk demo
+nbb --classpath "../innen/src:src:bin" bin/query.cljk deps node/maersk
+nbb --classpath "../innen/src:src:bin" bin/query.cljk explain node/log4shell node/log4j
+nbb --classpath "../innen/src:src:bin" bin/query.cljk as-of -0221
+nbb --classpath "../innen/src:src:bin" bin/query.cljk q \
   '[:find ?l :where [?e "innen.node/kind" "incident"] [?e "innen.node/label" ?l]]'
 ```
 
@@ -37,10 +37,10 @@ Two ingest paths, both writing sourced corpus files into `corpus/`:
 
 ```bash
 # external + historical: Wikidata statements -> edges (confidence :attested)
-nbb --classpath "../innen/src:src:scripts" scripts/ingest_wikidata.cljs --depth 1
+nbb --classpath "../innen/src:src:scripts" scripts/ingest_wikidata.cljk --depth 1
 
 # internal: the entities this workspace already records -> nodes (+ jurisdiction edges)
-nbb --classpath "../innen/src:src:scripts" scripts/ingest_workspace.cljs \
+nbb --classpath "../innen/src:src:scripts" scripts/ingest_workspace.cljk \
   --root <superproject-root> --merge-with corpus/wikidata-<date>.edn
 ```
 
@@ -88,7 +88,7 @@ Two things were wrong, and the second is the one worth reading:
 with a real exit code. It commits and pushes when the record grows and skips
 publication when it does not.
 
-Until 2026-08-22 there was no such job. `scripts/tick.cljs` claimed the
+Until 2026-08-22 there was no such job. `scripts/tick.cljk` claimed the
 residency was "registered with `tamaki` and run by launchd" and **neither half
 was true** — tamaki listed this loop only as an example line in its README, and
 `launchctl list` showed nothing while a dozen sibling residencies were loaded.
@@ -112,7 +112,7 @@ Tested against real temp repositories arranged in exactly that configuration,
 including an assertion that the *shipped* command fails on the same fixture.
 
 ```bash
-nbb --classpath "../innen/src:src:scripts" scripts/tick.cljs \
+nbb --classpath "../innen/src:src:scripts" scripts/tick.cljk \
   --root <superproject> --no-push
 ```
 
@@ -180,7 +180,7 @@ queryable `AgentRun`:
 launchd com.kotoba-lang.innen-tick   (StartInterval 21600, RunAtLoad)
   └─ ~/.gftd/run-innen-tick.cljs
        └─ tamaki exec "innen record tick <date>" --project <repo> --
-            nbb scripts/tick.cljs --depth 2
+            nbb scripts/tick.cljk --depth 2
                  ├─ ingest:wikidata   (guarded)
                  ├─ ingest:workspace  (guarded)
                  ├─ cycle             (report + one ledger line)
@@ -198,7 +198,7 @@ actual argv and exit code rather than pretending `kotoba-code` ran it. Per-tick
 detail stays in this repo's `ledger/loop-innen-ledger.edn` — two records, each
 authoritative for its own thing.
 
-Three failure policies, deliberately not uniform (`scripts/tick.cljs`):
+Three failure policies, deliberately not uniform (`scripts/tick.cljk`):
 
 - an **ingest** failure does not abort the tick — the previous corpus stands, the
   cycle still reports, and the step is marked failed. A transient Wikidata outage

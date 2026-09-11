@@ -1,7 +1,7 @@
 (ns loop-innen.publish
   "Committing and pushing a tick's output, from a west-managed checkout.
 
-  Extracted from `scripts/tick.cljs` on 2026-08-22 because it was wrong in two
+  Extracted from `scripts/tick.cljk` on 2026-08-22 because it was wrong in two
   ways that a resident job could not report, and because a script cannot be
   tested without running it.
 
