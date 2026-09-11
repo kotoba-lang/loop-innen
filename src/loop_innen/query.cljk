@@ -1,12 +1,12 @@
 (ns loop-innen.query
   "Datalog query layer over the 因縁 corpora.
 
-     nbb bin/query.cljk stats
-     nbb bin/query.cljk demo
-     nbb bin/query.cljk deps node/tsmc
-     nbb bin/query.cljk explain node/log4shell node/log4j
-     nbb bin/query.cljk as-of 1700
-     nbb bin/query.cljk q '[:find ?l :where [?e \"innen.node/kind\" \"incident\"] [?e \"innen.node/label\" ?l]]'
+     kbb --backend sci bin/query.cljk stats
+     kbb --backend sci bin/query.cljk demo
+     kbb --backend sci bin/query.cljk deps node/tsmc
+     kbb --backend sci bin/query.cljk explain node/log4shell node/log4j
+     kbb --backend sci bin/query.cljk as-of 1700
+     kbb --backend sci bin/query.cljk q '[:find ?l :where [?e \"innen.node/kind\" \"incident\"] [?e \"innen.node/label\" ?l]]'
 
    Convention, matching `com-junkawasaki/root`'s `manifest/edn-query.cljs` and
    `loop-system-dynamics/src/loop_system_dynamics/query.cljs` exactly: attributes
