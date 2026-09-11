@@ -1,7 +1,7 @@
 (ns ingest-workspace
   "Ingest the entities this workspace ALREADY records into the 因縁 graph.
 
-     nbb --classpath \"../innen/src:src:scripts\" scripts/ingest_workspace.cljs \\
+     nbb --classpath \"../innen/src:src:scripts\" scripts/ingest_workspace.cljk \\
        --root <superproject-root> [--merge-with corpus/wikidata-YYYY-MM-DD.edn] [--out corpus/…]
 
    Two local corpora, both already sourced by whoever created them:
@@ -159,7 +159,7 @@
         errors (is/errors (:innen/problems g))
         corpus {:innen/as-of as-of
                 :innen/dataset "innen-workspace"
-                :innen/ingest {:script "scripts/ingest_workspace.cljs"
+                :innen/ingest {:script "scripts/ingest_workspace.cljk"
                                :root root
                                :municipalities (count muni)
                                :legal-entities (count lei-nodes)

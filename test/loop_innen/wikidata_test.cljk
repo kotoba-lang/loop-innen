@@ -1,7 +1,7 @@
 (ns loop-innen.wikidata-test
   "Pure-function tests only -- no network. The API-touching parts
    (`resolve-seed`, `verify-properties!`, `fetch-entities`) are exercised by
-   actually running `scripts/ingest_wikidata.cljs`, whose output lands in
+   actually running `scripts/ingest_wikidata.cljk`, whose output lands in
    `corpus/` as checked-in evidence; mocking HTTP here would test the mock."
   (:require [cljs.test :refer [deftest is testing]]
             [loop-innen.wikidata :as wd]))

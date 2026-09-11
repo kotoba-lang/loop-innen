@@ -1,7 +1,7 @@
 (ns tick
   "One resident tick of the 因縁 record: ingest -> ingest -> cycle -> publish.
 
-     nbb --classpath \"../innen/src:src:scripts\" scripts/tick.cljs \\
+     nbb --classpath \"../innen/src:src:scripts\" scripts/tick.cljk \\
        [--depth 2] [--as-of YYYY-MM-DD] [--root <superproject>] [--no-push]
 
    Run by launchd through `tamaki exec`; the job is
@@ -107,17 +107,17 @@
                 " depth=" depth " push=" push?))
   (let [steps
         [(ingest-guarded! "ingest:wikidata"
-                          ["nbb" "--classpath" classpath "scripts/ingest_wikidata.cljs"
+                          ["nbb" "--classpath" classpath "scripts/ingest_wikidata.cljk"
                            "--depth" depth "--as-of" as-of
                            "--out" (str "corpus/wikidata-" as-of ".edn")]
                           (str "corpus/wikidata-" as-of ".edn"))
          (ingest-guarded! "ingest:workspace"
-                          ["nbb" "--classpath" classpath "scripts/ingest_workspace.cljs"
+                          ["nbb" "--classpath" classpath "scripts/ingest_workspace.cljk"
                            "--root" superproject "--as-of" as-of
                            "--merge-with" (str "corpus/wikidata-" as-of ".edn")
                            "--out" (str "corpus/workspace-" as-of ".edn")]
                           (str "corpus/workspace-" as-of ".edn"))]
-        cycle-step (run! "cycle" ["nbb" "--classpath" classpath "bin/run.cljs"
+        cycle-step (run! "cycle" ["nbb" "--classpath" classpath "bin/run.cljk"
                                   "--as-of" as-of])
         changed (publish/dirty-paths ".")
         publish

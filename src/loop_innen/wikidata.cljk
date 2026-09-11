@@ -275,7 +275,7 @@
    (`:node/n1973-oil-crisis`): EDN symbols -- and therefore keywords -- may not
    begin with a digit, so `:node/1973-oil-crisis` writes fine and then fails to
    read back. Found by the corpus round-trip check in
-   `scripts/ingest_wikidata.cljs`, which exists for exactly this class of bug."
+   `scripts/ingest_wikidata.cljk`, which exists for exactly this class of bug."
   [label qid]
   (let [slug (if (str/blank? (str label))
                (str/lower qid)

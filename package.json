@@ -3,7 +3,7 @@
   "private": true,
   "description": "nbb scripts for the innen dependency corpus query layer (kotoba-lang/datalog). No runtime JS of its own.",
   "scripts": {
-    "test": "nbb test/run_tests.cljs",
-    "query:demo": "nbb bin/query.cljs demo"
+    "test": "nbb test/run_tests.cljk",
+    "query:demo": "nbb bin/query.cljk demo"
   }
 }

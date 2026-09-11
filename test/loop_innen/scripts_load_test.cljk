@@ -2,7 +2,7 @@
   "The suite does not otherwise load the scripts, and that is how a syntax error
   shipped.
 
-  On 2026-08-22 a docstring in `scripts/tick.cljs` was given a bare `\"` in the
+  On 2026-08-22 a docstring in `scripts/tick.cljk` was given a bare `\"` in the
   middle of it. The docstring ended there, the next word was read as a symbol,
   and every invocation died with `registered is not ISeqable`. The unit suite
   stayed green throughout, because it exercises `src/` and never opens a script.
@@ -21,10 +21,10 @@
             [cljs.test :refer [deftest is testing]]))
 
 (def entry-points
-  ["scripts/tick.cljs"
-   "scripts/ingest_wikidata.cljs"
-   "scripts/ingest_workspace.cljs"
-   "bin/run.cljs"])
+  ["scripts/tick.cljk"
+   "scripts/ingest_wikidata.cljk"
+   "scripts/ingest_workspace.cljk"
+   "bin/run.cljk"])
 
 (defn- load-script
   "Run one entry point with --parse-only. Returns {:exit :err}."
@@ -45,6 +45,6 @@
 (deftest the-guard-runs-no-work
   (testing "--parse-only must exit before the ingest, or this test becomes a
             four-way network call on every suite run"
-    (let [{:keys [err]} (load-script "scripts/ingest_wikidata.cljs")]
+    (let [{:keys [err]} (load-script "scripts/ingest_wikidata.cljk")]
       (is (not (re-find #"seeds, depth" err))
           "the ingest banner appeared, so --parse-only did not stop the work"))))
