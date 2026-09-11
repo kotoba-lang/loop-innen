@@ -1,7 +1,7 @@
 (ns ingest-wikidata
   "Ingest real, sourced dependency edges from Wikidata into a corpus file.
 
-     nbb --classpath \"../innen/src:src\" scripts/ingest_wikidata.cljk \\
+     kbb --backend sci --classpath \"../innen/src:src\" scripts/ingest_wikidata.cljk \\
        [--depth 1] [--seeds resources/wikidata-seeds.edn] [--out corpus/…] [--as-of YYYY-MM-DD]
 
    Everything this script writes is checkable: every node carries its QID, every

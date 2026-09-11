@@ -20,14 +20,14 @@ the same split as `loop-system-dynamics` ⊣ `dynamics`. Implements ADR-26072585
 
 ```bash
 # one cycle: observe every corpus -> score -> report -> append one ledger line
-nbb --classpath "../innen/src:src:bin" bin/run.cljk
+kbb --backend sci --classpath "../innen/src:src:bin" bin/run.cljk
 
 # query the record (DataScript; same datalog dialect as manifest/edn-query.cljs)
-nbb --classpath "../innen/src:src:bin" bin/query.cljk demo
-nbb --classpath "../innen/src:src:bin" bin/query.cljk deps node/maersk
-nbb --classpath "../innen/src:src:bin" bin/query.cljk explain node/log4shell node/log4j
-nbb --classpath "../innen/src:src:bin" bin/query.cljk as-of -0221
-nbb --classpath "../innen/src:src:bin" bin/query.cljk q \
+kbb --backend sci --classpath "../innen/src:src:bin" bin/query.cljk demo
+kbb --backend sci --classpath "../innen/src:src:bin" bin/query.cljk deps node/maersk
+kbb --backend sci --classpath "../innen/src:src:bin" bin/query.cljk explain node/log4shell node/log4j
+kbb --backend sci --classpath "../innen/src:src:bin" bin/query.cljk as-of -0221
+kbb --backend sci --classpath "../innen/src:src:bin" bin/query.cljk q \
   '[:find ?l :where [?e "innen.node/kind" "incident"] [?e "innen.node/label" ?l]]'
 ```
 
@@ -37,10 +37,10 @@ Two ingest paths, both writing sourced corpus files into `corpus/`:
 
 ```bash
 # external + historical: Wikidata statements -> edges (confidence :attested)
-nbb --classpath "../innen/src:src:scripts" scripts/ingest_wikidata.cljk --depth 1
+kbb --backend sci --classpath "../innen/src:src:scripts" scripts/ingest_wikidata.cljk --depth 1
 
 # internal: the entities this workspace already records -> nodes (+ jurisdiction edges)
-nbb --classpath "../innen/src:src:scripts" scripts/ingest_workspace.cljk \
+kbb --backend sci --classpath "../innen/src:src:scripts" scripts/ingest_workspace.cljk \
   --root <superproject-root> --merge-with corpus/wikidata-<date>.edn
 ```
 
@@ -112,7 +112,7 @@ Tested against real temp repositories arranged in exactly that configuration,
 including an assertion that the *shipped* command fails on the same fixture.
 
 ```bash
-nbb --classpath "../innen/src:src:scripts" scripts/tick.cljk \
+kbb --backend sci --classpath "../innen/src:src:scripts" scripts/tick.cljk \
   --root <superproject> --no-push
 ```
 
@@ -155,7 +155,7 @@ Real findings from that cycle, all reproducible from the corpus files:
   Dependency structure and financial scale became askable together:
 
   ```bash
-  nbb --classpath ".:scripts/nbb_compat" manifest/edn-query.cljs q \
+  kbb --backend sci --classpath ".:scripts/nbb_compat" manifest/edn-query.cljs q \
     '[:find ?label ?rev ?kind ?dep :where
       [?n "company/lei" ?lei] [?n "innen.node/label" ?label] [?n "innen.node/id" ?nid]
       [?f "company/lei" ?lei] [?f "source/dataset" "market-intel"] [?f "company/revenue-usd" ?rev]
@@ -180,7 +180,7 @@ queryable `AgentRun`:
 launchd com.kotoba-lang.innen-tick   (StartInterval 21600, RunAtLoad)
   └─ ~/.gftd/run-innen-tick.cljs
        └─ tamaki exec "innen record tick <date>" --project <repo> --
-            nbb scripts/tick.cljk --depth 2
+            kbb --backend sci scripts/tick.cljk --depth 2
                  ├─ ingest:wikidata   (guarded)
                  ├─ ingest:workspace  (guarded)
                  ├─ cycle             (report + one ledger line)
@@ -229,7 +229,7 @@ must not be able to lose ground.
 ## Test
 
 ```bash
-npm test    # nbb via `clojure -A:test -Spath`; 10 tests, 63 assertions
+npm test    # nbb via `kbb -A:test -Spath`; 10 tests, 63 assertions
 ```
 
 Tests are hermetic (temp corpus dirs, no network). The API-touching paths are

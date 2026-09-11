@@ -1,7 +1,7 @@
 (ns query
   "CLI for the Datalog query layer over the 因縁 corpora.
 
-     nbb bin/query.cljk <mode> [args]
+     kbb --backend sci bin/query.cljk <mode> [args]
 
    modes: stats | demo | deps <node-id> | explain <from> <to> | as-of <year> | q '<datalog>'"
   (:require [loop-innen.query :as lq]))
@@ -17,5 +17,5 @@
     "q" (let [{:keys [db]} (lq/build dir)]
           (doseq [row (sort-by str (lq/q a db))]
             (println (pr-str row))))
-    (do (println "usage: nbb bin/query.cljk [stats | demo | deps <node-id> | explain <from> <to> | as-of <year> | q '<datalog>']")
+    (do (println "usage: kbb --backend sci bin/query.cljk [stats | demo | deps <node-id> | explain <from> <to> | as-of <year> | q '<datalog>']")
         (js/process.exit 1))))
