@@ -10,7 +10,7 @@
 
   Note what did NOT work as a check: counting quotes. The broken line had two of
   them, so parity was preserved and the file still 'looked' balanced. The same
-  trap CLAUDE.md records for heredoc EDN — an even number of quotes closes every
+  trap AGENTS.md records for heredoc EDN — an even number of quotes closes every
   form, and the reader returns a value without complaining.
 
   So this test loads each entry point for real, in a subprocess, with
